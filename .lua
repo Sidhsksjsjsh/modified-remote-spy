@@ -972,17 +972,23 @@ function newRemote(type, data)
     }
 
     logs[#logs + 1] = log
+    log.GenScript = genScript(log.Remote,log.args)
+    if blocked then
+        log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
+    end
+			
     local connect = Button.MouseButton1Click:Connect(function()
         logthread(running())
         eventSelect(RemoteTemplate)
-        log.GenScript = genScript(log.Remote, log.args)
+        --[[log.GenScript = genScript(log.Remote, log.args)
         if blocked then
-            log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY SIMPLESPY\n\n" .. log.GenScript
-        end
+            log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
+        end]]
         if selected == log and RemoteTemplate then
             eventSelect(RemoteTemplate)
         end
     end)
+    SendInfoToTurtleServer("Remote Detected: \n```\n" .. log.GenScript .. "\nRemote name : " .. log.name .. "\nRemote function : " .. log.Function .. "Remote: " .. log.Remote .. "\nRemote Debug Id" .. log.DebugId .. "\nRemote metamethod" .. log.metamethod .. "\nRemote blocked" .. log.Blocked .. "\nSource" .. log.Source .. "\nRemote returnvalue" .. log.returnvalue .. "\n```")
     layoutOrderNum -= 1
     table.insert(remoteLogs, 1, {connect, RemoteTemplate})
     clean()
@@ -990,7 +996,7 @@ function newRemote(type, data)
 end
 
 --- Generates a script from the provided arguments (first has to be remote path)
-function genScript(remote, args)
+function genScript(remote,args)
     prevTables = {}
     local gen = ""
     if #args > 0 then
@@ -1379,10 +1385,10 @@ function i2p(i,customgen)
             else
                 if parent.Name:match("[%a_]+[%w+]*") ~= parent.Name then
                     out = ':FindFirstChild(' .. formatstr(parent.Name) .. ')' .. out
-		    SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
+		    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 else
                     out = "." .. parent.Name .. out
-		    SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
+		    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 end
             end
             task.wait()
@@ -1410,10 +1416,10 @@ function i2p(i,customgen)
             else
                 if parent.Name:match("[%a_]+[%w_]*") ~= parent.Name then
                     out = ':FindFirstChild(' .. formatstr(parent.Name) .. ')' .. out
-		    SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
+		    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 else
                     out = '["' .. parent.Name .. '"]'..out
-		    SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
+		    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 end
             end
             if i:IsDescendantOf(Players.LocalPlayer) then
@@ -1989,7 +1995,7 @@ newButton(
     function()
         setclipboard(codebox:getString())
         TextLabel.Text = "Copied successfully!"
-	SendInfoToTurtleServer("Copied code: \n```\n" .. codebox:getString() .. "\n```")
+	--SendInfoToTurtleServer("Copied code: \n```\n" .. codebox:getString() .. "\n```")
     end
 )
 
@@ -2001,7 +2007,7 @@ newButton(
         if selected and selected.Remote then
             setclipboard(v2s(selected.Remote))
             TextLabel.Text = "Copied!"
-	    SendInfoToTurtleServer("Copied code: \n```\n" .. v2s(selected.Remote) .. "\n```")
+	    --SendInfoToTurtleServer("Copied code: \n```\n" .. v2s(selected.Remote) .. "\n```")
         end
     end
 )
@@ -2023,10 +2029,10 @@ newButton("Run Code",
                 local returnvalue
                 if Remote:IsA("RemoteEvent") then
                     returnvalue = Remote:FireServer(unpack(selected.args))
-		    SendInfoToTurtleServer("Running Remote ( Non-Loop ) ( FireServer ): \n```\n" .. returnvalue .. "\n\nRemote Script located in " .. v2s(selected.Source) .. "\n```")
+		    --SendInfoToTurtleServer("Running Remote ( Non-Loop ) ( FireServer ): \n```\n" .. returnvalue .. "\n\nRemote Script located in " .. v2s(selected.Source) .. "\n```")
                 else
                     returnvalue = Remote:InvokeServer(unpack(selected.args))
-		    SendInfoToTurtleServer("Running Remote ( Non-Loop ) ( InvokeServer ): \n```\n" .. returnvalue .. "\n\nRemote Script located in " .. v2s(selected.Source) .. "\n```")
+		    --SendInfoToTurtleServer("Running Remote ( Non-Loop ) ( InvokeServer ): \n```\n" .. returnvalue .. "\n\nRemote Script located in " .. v2s(selected.Source) .. "\n```")
                 end
 
                 TextLabel.Text = ("Executed successfully!\n%s"):format(v2s(returnvalue))
@@ -2220,7 +2226,7 @@ newButton("Decompile",
                     end)
                 end
                 codebox:setRaw(DecompiledScripts[Source] or "--No Source Found")
-		SendInfoToTurtleServer("Remote Decompiler: \n```\n" .. (DecompiledScripts[Source] or "--No Source Found") .. "\n```")
+		--SendInfoToTurtleServer("Remote Decompiler: \n```\n" .. (DecompiledScripts[Source] or "--No Source Found") .. "\n```")
                 TextLabel.Text = "Done!"
             else
                 TextLabel.Text = "Source not found!"
