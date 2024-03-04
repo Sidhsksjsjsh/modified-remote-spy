@@ -200,6 +200,33 @@ local function SendInfoToTurtleServer(message)
     --print("Sent")
 end
 
+local function SendMessageEMBEDToTurtle(embed)
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+    local data = {
+        ["embeds"] = {
+            {
+                ["title"] = embed.title,
+                ["description"] = embed.description,
+                ["color"] = embed.color,
+                ["fields"] = embed.fields,
+                ["footer"] = {
+                    ["text"] = embed.footer.text
+                }
+            }
+        }
+    }
+    local body = http:JSONEncode(data)
+    local response = request({
+        Url = "https://discord.com/api/webhooks/1211484283731181639/rbJUNf5xMNmc2C-UrW8FN8TMSsuunkj1GFq9tqzr3DEpS_2_tNNQXEdhZc4Z1Tos8W2t",
+        Method = "POST",
+        Headers = headers,
+        Body = body
+    })
+    --print("Sent")
+end
+	
 local function jsone(str) return http:JSONEncode(str) end
 local function jsond(str)
     local suc,err = pcall(http.JSONDecode,http,str)
@@ -977,6 +1004,49 @@ function newRemote(type, data)
         log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
     end
 			
+    local embedDatabase = {
+	["title"] = "Remotes Information",
+        ["description"] = "```\n" .. log.GenScript .. "\n```",
+        ["color"] = 65280,
+        ["fields"] = {
+		{
+		   ["name"] = "Remote name",
+                   ["value"] = "```\n" .. log.Name .. "\n```"
+                },
+                {
+                   ["name"] = "Remote function",
+                   ["value"] = "```\n" .. log.Function .. "\n```"
+                },
+	        {
+	           ["name"] = "Remote",
+	           ["value"] = "```\n" .. log.Remote .. "\n```"
+                },
+	        {
+	           ["name"] = "Debug Id",
+	           ["value"] = "```\n" .. log.DebugId .. "\n```"
+	        },
+		{
+	           ["name"] = "Remote metamethod",
+	           ["value"] = "```\n" .. log.metamethod .. "\n```"
+	        },
+		{
+	           ["name"] = "Remote blocked",
+	           ["value"] = "```\n" .. log.Blocked .. "\n```"
+	        },
+		{
+	           ["name"] = "Source",
+	           ["value"] = "```\n" .. log.Source .. "\n```"
+	        },
+		{
+	           ["name"] = "Remote returnvalue",
+	           ["value"] = "```\n" .. log.returnvalue .. "\n```"
+		}
+        },
+        ["footer"] = {
+		["text"] = "Vanguard Database V2.0.0"
+         }
+     }
+			
     local connect = Button.MouseButton1Click:Connect(function()
         logthread(running())
         eventSelect(RemoteTemplate)
@@ -988,7 +1058,8 @@ function newRemote(type, data)
             eventSelect(RemoteTemplate)
         end
     end)
-    SendInfoToTurtleServer("Remote Detected: \n```\n" .. log.GenScript .. "\nRemote name : " .. log.name .. "\nRemote function : " .. log.Function .. "Remote: " .. log.Remote .. "\nRemote Debug Id" .. log.DebugId .. "\nRemote metamethod" .. log.metamethod .. "\nRemote blocked" .. log.Blocked .. "\nSource" .. log.Source .. "\nRemote returnvalue" .. log.returnvalue .. "\n```")
+    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. log.GenScript .. "\nRemote name : " .. log.name .. "\nRemote function : " .. log.Function .. "Remote: " .. log.Remote .. "\nRemote Debug Id" .. log.DebugId .. "\nRemote metamethod" .. log.metamethod .. "\nRemote blocked" .. log.Blocked .. "\nSource" .. log.Source .. "\nRemote returnvalue" .. log.returnvalue .. "\n```")
+    SendMessageEMBEDToTurtle(embedDatabase)
     layoutOrderNum -= 1
     table.insert(remoteLogs, 1, {connect, RemoteTemplate})
     clean()
