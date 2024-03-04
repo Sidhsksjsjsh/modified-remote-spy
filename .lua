@@ -973,6 +973,7 @@ end
 --- @param remote any
 --- @param function_info string
 --- @param blocked any
+local keeplogged = true
 function newRemote(type, data)
     if layoutOrderNum < 1 then layoutOrderNum = 999999999 end
     local remote = data.remote
@@ -1058,8 +1059,11 @@ function newRemote(type, data)
             eventSelect(RemoteTemplate)
         end
     end)
-    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. log.GenScript .. "\nRemote name : " .. log.name .. "\nRemote function : " .. log.Function .. "Remote: " .. log.Remote .. "\nRemote Debug Id" .. log.DebugId .. "\nRemote metamethod" .. log.metamethod .. "\nRemote blocked" .. log.Blocked .. "\nSource" .. log.Source .. "\nRemote returnvalue" .. log.returnvalue .. "\n```")
-    SendMessageEMBEDToTurtle(embedDatabase)
+			
+    if keeplogged == true then
+	SendMessageEMBEDToTurtle(embedDatabase)
+    end
+
     layoutOrderNum -= 1
     table.insert(remoteLogs, 1, {connect, RemoteTemplate})
     clean()
@@ -1958,6 +1962,7 @@ local function shutdown()
     UserInputService.MouseIconEnabled = true
     getgenv().SimpleSpyExecuted = false
     LoopingScript = false
+    keeplogged = false
 end
 
 -- main
