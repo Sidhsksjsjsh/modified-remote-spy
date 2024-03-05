@@ -998,50 +998,7 @@ function newRemote(type, data)
         GenScript = "-- Generating, please wait...\n-- (If this message persists, the remote args are likely extremely long)"
     }
 
-    logs[#logs + 1] = log			
-    local embedDatabase = {
-	["title"] = "Remotes Information",
-        ["description"] = "```\n" .. genScript(log.Remote,log.args) .. "\n```",
-        ["color"] = 65280,
-        ["fields"] = {
-		{
-		   ["name"] = "Remote name",
-                   ["value"] = "```\n" .. log.Name .. "\n```"
-                },
-                {
-                   ["name"] = "Remote function",
-                   ["value"] = "```\n" .. log.Function .. "\n```"
-                },
-	        {
-	           ["name"] = "Remote",
-	           ["value"] = "```\n" .. log.Remote .. "\n```"
-                },
-	        {
-	           ["name"] = "Debug Id",
-	           ["value"] = "```\n" .. log.DebugId .. "\n```"
-	        },
-		{
-	           ["name"] = "Remote metamethod",
-	           ["value"] = "```\n" .. log.metamethod .. "\n```"
-	        },
-		{
-	           ["name"] = "Remote blocked",
-	           ["value"] = "```\n" .. log.Blocked .. "\n```"
-	        },
-		{
-	           ["name"] = "Source",
-	           ["value"] = "```\n" .. log.Source .. "\n```"
-	        },
-		{
-	           ["name"] = "Remote returnvalue",
-	           ["value"] = "```\n" .. log.returnvalue .. "\n```"
-		}
-        },
-        ["footer"] = {
-		["text"] = "Vanguard Database V2.0.0"
-         }
-     }
-			
+    logs[#logs + 1] = log
     local connect = Button.MouseButton1Click:Connect(function()
         logthread(running())
         eventSelect(RemoteTemplate)
@@ -1049,15 +1006,14 @@ function newRemote(type, data)
         if blocked then
             log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
         end
-	SendMessageEMBEDToTurtle(embedDatabase)
-        if selected == log and RemoteTemplate then
+	if selected == log and RemoteTemplate then
             eventSelect(RemoteTemplate)
-	    SendMessageEMBEDToTurtle(embedDatabase)
         end
     end)
-			
+
+    SendInfoToTurtleServer("```\n" .. log.GenScript .. "\n```")
     layoutOrderNum -= 1
-    table.insert(remoteLogs, 1, {connect, RemoteTemplate})
+    table.insert(remoteLogs,1,{connect,RemoteTemplate})
     clean()
     updateRemoteCanvas()
 end
