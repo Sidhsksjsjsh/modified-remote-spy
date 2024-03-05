@@ -61,7 +61,7 @@ local getcallingscript = getcallingscript or blankfunction
 local newcclosure = newcclosure or blankfunction
 local clonefunction = clonefunction or blankfunction
 local cloneref = cloneref or blankfunction
-local request = (syn and syn.request) or http and http.request or http_request or (fluxus and fluxus.request) or request
+local request = request or syn and syn.request
 local makewritable = makewriteable or function(tbl)
     setreadonly(tbl,false)
 end
@@ -274,7 +274,7 @@ local CodeBox = Create("Frame",{Parent = RightPanel,BackgroundColor3 = Color3.ne
 local ScrollingFrame = Create("ScrollingFrame",{Parent = RightPanel,Active = true,BackgroundColor3 = Color3.new(1, 1, 1),BackgroundTransparency = 1,Position = UDim2.new(0, 0, 0.5, 0),Size = UDim2.new(1, 0, 0.5, -9),CanvasSize = UDim2.new(0, 0, 0, 0),ScrollBarThickness = 4})
 local UIGridLayout = Create("UIGridLayout",{Parent = ScrollingFrame,HorizontalAlignment = Enum.HorizontalAlignment.Center,SortOrder = Enum.SortOrder.LayoutOrder,CellPadding = UDim2.new(0, 0, 0, 0),CellSize = UDim2.new(0, 94, 0, 27)})
 local TopBar = Create("Frame",{Parent = Background,BackgroundColor3 = Color3.fromRGB(37, 35, 38),BorderSizePixel = 0,Size = UDim2.new(0, 450, 0, 19)})
-local Simple = Create("TextButton",{Parent = TopBar,BackgroundColor3 = Color3.new(1, 1, 1),AutoButtonColor = false,BackgroundTransparency = 1,Position = UDim2.new(0, 5, 0, 0),Size = UDim2.new(0, 57, 0, 18),Font = Enum.Font.SourceSansBold,Text =  "Vanguard - RemoteDetections V3 ( RemoteSpy )",TextColor3 = Color3.new(1, 1, 1),TextSize = 14,TextXAlignment = Enum.TextXAlignment.Left})
+local Simple = Create("TextButton",{Parent = TopBar,BackgroundColor3 = Color3.new(1, 1, 1),AutoButtonColor = false,BackgroundTransparency = 1,Position = UDim2.new(0, 5, 0, 0),Size = UDim2.new(0, 57, 0, 18),Font = Enum.Font.SourceSansBold,Text =  "Silent Source Snatcher V2",TextColor3 = Color3.new(1, 1, 1),TextSize = 14,TextXAlignment = Enum.TextXAlignment.Left})
 local CloseButton = Create("TextButton",{Parent = TopBar,BackgroundColor3 = Color3.new(0.145098, 0.141176, 0.14902),BorderSizePixel = 0,Position = UDim2.new(1, -19, 0, 0),Size = UDim2.new(0, 19, 0, 19),Font = Enum.Font.SourceSans,Text = "",TextColor3 = Color3.new(0, 0, 0),TextSize = 14})
 local ImageLabel = Create("ImageLabel",{Parent = CloseButton,BackgroundColor3 = Color3.new(1, 1, 1),BackgroundTransparency = 1,Position = UDim2.new(0, 5, 0, 5),Size = UDim2.new(0, 9, 0, 9),Image = "http://www.roblox.com/asset/?id=5597086202"})
 local MaximizeButton = Create("TextButton",{Parent = TopBar,BackgroundColor3 = Color3.new(0.145098, 0.141176, 0.14902),BorderSizePixel = 0,Position = UDim2.new(1, -38, 0, 0),Size = UDim2.new(0, 19, 0, 19),Font = Enum.Font.SourceSans,Text = "",TextColor3 = Color3.new(0, 0, 0),TextSize = 14})
@@ -1002,31 +1002,29 @@ function newRemote(type, data)
     local connect = Button.MouseButton1Click:Connect(function()
         logthread(running())
         eventSelect(RemoteTemplate)
-        log.GenScript = genScript(log.Remote,log.args)
-        --[[if blocked then
-            log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
-        end]]
-	if selected == log and RemoteTemplate then
+        log.GenScript = genScript(log.Remote, log.args)
+        if blocked then
+            log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY SIMPLESPY\n\n" .. log.GenScript
+        end
+        if selected == log and RemoteTemplate then
             eventSelect(RemoteTemplate)
         end
     end)
-
-    SendInfoToTurtleServer("```\n" .. genScript(log.Remote,log.args) .. "\n```")
     layoutOrderNum -= 1
-    table.insert(remoteLogs,1,{connect,RemoteTemplate})
+    table.insert(remoteLogs, 1, {connect, RemoteTemplate})
     clean()
     updateRemoteCanvas()
 end
 
 --- Generates a script from the provided arguments (first has to be remote path)
-function genScript(remote,args)
+function genScript(remote, args)
     prevTables = {}
     local gen = ""
     if #args > 0 then
         xpcall(function()
             gen = v2v({args = args}) .. "\n"
         end,function(err)
-            gen = "-- An error has occured:\n--"..err.."\n-- TableToString failure! Reverting to legacy functionality (results may vary)\nlocal args = {"
+            gen ..= "-- An error has occured:\n--"..err.."\n-- TableToString failure! Reverting to legacy functionality (results may vary)\nlocal args = {"
             xpcall(function()
                 for i, v in next, args do
                     if type(i) ~= "Instance" and type(i) ~= "userdata" then
@@ -1048,16 +1046,16 @@ function genScript(remote,args)
                         gen = gen .. "game." .. v:GetFullName()
                     end
                 end
-                gen = "\n}\n\n"
+                gen ..= "\n}\n\n"
             end,function()
-                gen = "}\n-- Legacy tableToString failure! Unable to decompile."
+                gen ..= "}\n-- Legacy tableToString failure! Unable to decompile."
             end)
         end)
         if not remote:IsDescendantOf(game) and not getnilrequired then
             gen = "function getNil(name,class) for _,v in next, getnilinstances()do if v.ClassName==class and v.Name==name then return v;end end end\n\n" .. gen
         end
         if remote:IsA("RemoteEvent") then
-            gen = v2s(remote) .. ":FireServer(unpack(args))"
+            gen ..= v2s(remote) .. ":FireServer(unpack(args))"
         elseif remote:IsA("RemoteFunction") then
             gen = gen .. v2s(remote) .. ":InvokeServer(unpack(args))"
         end
@@ -1408,10 +1406,8 @@ function i2p(i,customgen)
             else
                 if parent.Name:match("[%a_]+[%w+]*") ~= parent.Name then
                     out = ':FindFirstChild(' .. formatstr(parent.Name) .. ')' .. out
-		    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 else
                     out = "." .. parent.Name .. out
-		    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 end
             end
             task.wait()
@@ -1439,10 +1435,8 @@ function i2p(i,customgen)
             else
                 if parent.Name:match("[%a_]+[%w_]*") ~= parent.Name then
                     out = ':FindFirstChild(' .. formatstr(parent.Name) .. ')' .. out
-		    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 else
                     out = '["' .. parent.Name .. '"]'..out
-		    --SendInfoToTurtleServer("Remote Detected: \n```\n" .. out .. "\n```")
                 end
             end
             if i:IsDescendantOf(Players.LocalPlayer) then
@@ -1910,7 +1904,6 @@ local function shutdown()
     UserInputService.MouseIconEnabled = true
     getgenv().SimpleSpyExecuted = false
     LoopingScript = false
-    keeplogged = false
 end
 
 -- main
@@ -2019,7 +2012,6 @@ newButton(
     function()
         setclipboard(codebox:getString())
         TextLabel.Text = "Copied successfully!"
-	--SendInfoToTurtleServer("Copied code: \n```\n" .. codebox:getString() .. "\n```")
     end
 )
 
@@ -2031,7 +2023,6 @@ newButton(
         if selected and selected.Remote then
             setclipboard(v2s(selected.Remote))
             TextLabel.Text = "Copied!"
-	    --SendInfoToTurtleServer("Copied code: \n```\n" .. v2s(selected.Remote) .. "\n```")
         end
     end
 )
@@ -2043,20 +2034,12 @@ newButton("Run Code",
         local Remote = selected and selected.Remote
         if Remote then
             TextLabel.Text = "Executing..."
-	    if selected then
-		if not selected.Source then
-			selected.Source = rawget(getfenv(selected.Function),"script")
-	        end
-	    end
-					
             xpcall(function()
                 local returnvalue
                 if Remote:IsA("RemoteEvent") then
                     returnvalue = Remote:FireServer(unpack(selected.args))
-		    --SendInfoToTurtleServer("Running Remote ( Non-Loop ) ( FireServer ): \n```\n" .. returnvalue .. "\n\nRemote Script located in " .. v2s(selected.Source) .. "\n```")
                 else
                     returnvalue = Remote:InvokeServer(unpack(selected.args))
-		    --SendInfoToTurtleServer("Running Remote ( Non-Loop ) ( InvokeServer ): \n```\n" .. returnvalue .. "\n\nRemote Script located in " .. v2s(selected.Source) .. "\n```")
                 end
 
                 TextLabel.Text = ("Executed successfully!\n%s"):format(v2s(returnvalue))
@@ -2250,7 +2233,6 @@ newButton("Decompile",
                     end)
                 end
                 codebox:setRaw(DecompiledScripts[Source] or "--No Source Found")
-		--SendInfoToTurtleServer("Remote Decompiler: \n```\n" .. (DecompiledScripts[Source] or "--No Source Found") .. "\n```")
                 TextLabel.Text = "Done!"
             else
                 TextLabel.Text = "Source not found!"
@@ -2341,7 +2323,7 @@ newButton("Auto run Code",function()
     end -- 1
 end)
 
-if configs.supersecretdevtoggle and game.Players.LocalPlayer.Name == "Rivanda_Cheater" then
+if configs.supersecretdevtoggle and Players.LocalPlayer.Name == "Rivanda_Cheater" then
     newButton("Load SSV2.2",function()
         return "Load's Simple Spy V2.2"
     end,
