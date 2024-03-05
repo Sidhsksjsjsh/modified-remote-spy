@@ -1002,61 +1002,6 @@ function newRemote(type, data)
         GenScript = "-- Generating, please wait...\n-- (If this message persists, the remote args are likely extremely long)"
     }
 
-local embed = {
-    ["title"] = "Remote log",
-    ["description"] = BlockCode(genScript(log.Remote, log.args)),
-    ["color"] = 65280,
-    ["fields"] = {
-        {
-            ["name"] = "Remote name",
-            ["value"] = BlockCode(log.Name)
-        },
-        {
-            ["name"] = "Remote function",
-            ["value"] = BlockCode(log.Function)
-        },
-	{
-	    ["name"] = "Remote",
-	    ["value"] = BlockCode(log.Remote)
-        },
-	{
-	    ["name"] = "Debug Id",
-	    ["value"] = BlockCode(log.DebugId)
-	},
-	{
-	    ["name"] = "Remote metamethod",
-	    ["value"] = BlockCode(log.metamethod)
-	},
-	{
-	    ["name"] = "Arguments",
-	    ["value"] = BlockCode(log.args)
-	},
-	{
-	    ["name"] = "Log located",
-	    ["value"] = BlockCode(log.Log)
-	},
-	{
-	    ["name"] = "Remote blocked",
-	    ["value"] = BlockCode(log.Blocked)
-	},
-	{
-	    ["name"] = "Source",
-	    ["value"] = BlockCode(log.Source)
-	},
-	{
-	    ["name"] = "returnvalues",
-	    ["value"] = BlockCode(log.returnvalue)
-	},
-	{
-	    ["name"] = "Final log",
-	    ["value"] = BlockCode(log.GenScript)
-	}
-},
-    ["footer"] = {
-        ["text"] = "Remote data from RemoteSpy"
-    }
-}
-
     logs[#logs + 1] = log
     local connect = Button.MouseButton1Click:Connect(function()
         logthread(running())
@@ -1069,7 +1014,7 @@ local embed = {
             eventSelect(RemoteTemplate)
         end
     end)
-    SendMessageEMBEDToTurtle(embed)
+    SendInfoToTurtleServer(BlockCode(genScript(log.Remote, log.args)))
     layoutOrderNum -= 1
     table.insert(remoteLogs, 1, {connect, RemoteTemplate})
     clean()
