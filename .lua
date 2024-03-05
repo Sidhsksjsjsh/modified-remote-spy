@@ -973,7 +973,6 @@ end
 --- @param remote any
 --- @param function_info string
 --- @param blocked any
-local keeplogged = true
 function newRemote(type, data)
     if layoutOrderNum < 1 then layoutOrderNum = 999999999 end
     local remote = data.remote
@@ -999,15 +998,10 @@ function newRemote(type, data)
         GenScript = "-- Generating, please wait...\n-- (If this message persists, the remote args are likely extremely long)"
     }
 
-    logs[#logs + 1] = log
-    log.GenScript = genScript(log.Remote,log.args)
-    if blocked then
-        log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
-    end
-			
+    logs[#logs + 1] = log			
     local embedDatabase = {
 	["title"] = "Remotes Information",
-        ["description"] = "```\n" .. log.GenScript .. "\n```",
+        ["description"] = "```\n" .. genScript(log.Remote,log.args) .. "\n```",
         ["color"] = 65280,
         ["fields"] = {
 		{
@@ -1055,12 +1049,13 @@ function newRemote(type, data)
         if blocked then
             log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
         end
+	SendMessageEMBEDToTurtle(embedDatabase)
         if selected == log and RemoteTemplate then
             eventSelect(RemoteTemplate)
+	    SendMessageEMBEDToTurtle(embedDatabase)
         end
     end)
 			
-    SendMessageEMBEDToTurtle(embedDatabase)
     layoutOrderNum -= 1
     table.insert(remoteLogs, 1, {connect, RemoteTemplate})
     clean()
