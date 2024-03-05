@@ -1002,24 +1002,24 @@ function newRemote(type, data)
     local connect = Button.MouseButton1Click:Connect(function()
         logthread(running())
         eventSelect(RemoteTemplate)
-        log.GenScript = genScript(log.Remote, log.args)
-        if blocked then
+        log.GenScript = genScript(log.Remote,log.args)
+        --[[if blocked then
             log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
-        end
+        end]]
 	if selected == log and RemoteTemplate then
             eventSelect(RemoteTemplate)
         end
     end)
 
-    SendInfoToTurtleServer("```\n" .. log.GenScript .. "\n```")
+    SendInfoToTurtleServer("```\n" .. genScript(log.Remote,log.args) .. "\n```")
     layoutOrderNum -= 1
-    table.insert(remoteLogs, 1, {connect, RemoteTemplate})
+    table.insert(remoteLogs,1,{connect,RemoteTemplate})
     clean()
     updateRemoteCanvas()
 end
 
 --- Generates a script from the provided arguments (first has to be remote path)
-function genScript(remote, args)
+function genScript(remote,args)
     prevTables = {}
     local gen = ""
     if #args > 0 then
