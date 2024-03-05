@@ -1026,7 +1026,7 @@ function genScript(remote,args)
         xpcall(function()
             gen = v2v({args = args}) .. "\n"
         end,function(err)
-            gen ..= "-- An error has occured:\n--"..err.."\n-- TableToString failure! Reverting to legacy functionality (results may vary)\nlocal args = {"
+            gen = "-- An error has occured:\n--"..err.."\n-- TableToString failure! Reverting to legacy functionality (results may vary)\nlocal args = {"
             xpcall(function()
                 for i, v in next, args do
                     if type(i) ~= "Instance" and type(i) ~= "userdata" then
@@ -1048,9 +1048,9 @@ function genScript(remote,args)
                         gen = gen .. "game." .. v:GetFullName()
                     end
                 end
-                gen ..= "\n}\n\n"
+                gen = "\n}\n\n"
             end,function()
-                gen ..= "}\n-- Legacy tableToString failure! Unable to decompile."
+                gen = "}\n-- Legacy tableToString failure! Unable to decompile."
             end)
         end)
         if not remote:IsDescendantOf(game) and not getnilrequired then
