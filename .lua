@@ -1051,19 +1051,16 @@ function newRemote(type, data)
     local connect = Button.MouseButton1Click:Connect(function()
         logthread(running())
         eventSelect(RemoteTemplate)
-        --[[log.GenScript = genScript(log.Remote, log.args)
+        log.GenScript = genScript(log.Remote, log.args)
         if blocked then
             log.GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING TO THE SERVER BY VANGUARD\n\n" .. log.GenScript
-        end]]
+        end
         if selected == log and RemoteTemplate then
             eventSelect(RemoteTemplate)
         end
     end)
 			
-    if keeplogged == true then
-	SendMessageEMBEDToTurtle(embedDatabase)
-    end
-
+    SendMessageEMBEDToTurtle(embedDatabase)
     layoutOrderNum -= 1
     table.insert(remoteLogs, 1, {connect, RemoteTemplate})
     clean()
