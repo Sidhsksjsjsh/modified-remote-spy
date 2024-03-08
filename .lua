@@ -1063,12 +1063,17 @@ function genScript(remote, args)
             gen ..= v2s(remote) .. ":FireServer(unpack(args))"
         elseif remote:IsA("RemoteFunction") then
             gen = gen .. v2s(remote) .. ":InvokeServer(unpack(args))"
+	elseif remote:IsA("BindableEvent") then
+	    --gen = gen .. v2s(remote) .. ":Fire(unpack(args))"
+	    gen ..= v2s(remote) .. ":Fire(unpack(args))"
         end
     else
         if remote:IsA("RemoteEvent") then
             gen ..= v2s(remote) .. ":FireServer()"
         elseif remote:IsA("RemoteFunction") then
             gen ..= v2s(remote) .. ":InvokeServer()"
+	elseif remote:IsA("BindableEvent") then
+	    gen ..= v2s(remote) .. ":Fire()"
         end
     end
     prevTables = {}
