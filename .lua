@@ -1066,6 +1066,8 @@ function genScript(remote, args)
 	elseif remote:IsA("BindableEvent") then
 	    --gen = gen .. v2s(remote) .. ":Fire(unpack(args))"
 	    gen ..= v2s(remote) .. ":Fire(unpack(args))"
+	elseif remote:IsA("BindableFunction") then
+            gen = gen .. v2s(remote) .. ":Invoke(unpack(args))"
         end
     else
         if remote:IsA("RemoteEvent") then
@@ -1074,6 +1076,8 @@ function genScript(remote, args)
             gen ..= v2s(remote) .. ":InvokeServer()"
 	elseif remote:IsA("BindableEvent") then
 	    gen ..= v2s(remote) .. ":Fire()"
+	elseif remote:IsA("BindableFunction") then
+            gen ..= v2s(remote) .. ":Invoke()"
         end
     end
     prevTables = {}
@@ -2048,8 +2052,12 @@ newButton("Run Code",
                 local returnvalue
                 if Remote:IsA("RemoteEvent") then
                     returnvalue = Remote:FireServer(unpack(selected.args))
-                else
+                elseif Remote:IsA("RemoteFunction") then
                     returnvalue = Remote:InvokeServer(unpack(selected.args))
+		elseif Remote:IsA("BindableEvent") then
+                    returnvalue = Remote:Fire(unpack(selected.args))
+		elseif Remote:IsA("BindableFunction") then
+                    returnvalue = Remote:Invoke(unpack(selected.args))
                 end
 
                 TextLabel.Text = ("Executed successfully!\n%s"):format(v2s(returnvalue))
@@ -2326,8 +2334,12 @@ newButton("Auto run Code",function()
                 local returnvalue
                 if Remote:IsA("RemoteEvent") then -- 3
                     returnvalue = Remote:FireServer(unpack(selected.args))
-                else
+                elseif Remote:IsA("RemoteFunction") then
                     returnvalue = Remote:InvokeServer(unpack(selected.args))
+		elseif Remote:IsA("BindableEvent") then
+                    returnvalue = Remote:Fire(unpack(selected.args))
+		elseif Remote:IsA("BindableFunction") then
+                    returnvalue = Remote:Invoke(unpack(selected.args))
                 end -- 3
          end -- 2
     end -- 1
